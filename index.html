@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Netlab · Portafolio Operativo</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #ffffff;
+    --panel-2: #f4f4f5;
+    --text: #09090b;
+    --muted: #71717a;
+    --border: #e4e4e7;
+    --border-strong: #d4d4d8;
+    --green: #16a34a;
+    --green-bg: #dcfce7;
+    --yellow: #ca8a04;
+    --yellow-bg: #fef9c3;
+    --red: #dc2626;
+    --red-bg: #fee2e2;
+    --gray: #71717a;
+    --gray-bg: #f4f4f5;
+    --accent: #2563eb;
+    --shadow: 0 1px 2px 0 rgba(0,0,0,0.04), 0 1px 3px 0 rgba(0,0,0,0.04);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0a0a0a;
+      --panel: #111113;
+      --panel-2: #18181b;
+      --text: #fafafa;
+      --muted: #a1a1aa;
+      --border: #27272a;
+      --border-strong: #3f3f46;
+      --green: #4ade80;
+      --green-bg: rgba(34,197,94,0.12);
+      --yellow: #facc15;
+      --yellow-bg: rgba(234,179,8,0.12);
+      --red: #f87171;
+      --red-bg: rgba(239,68,68,0.12);
+      --gray: #a1a1aa;
+      --gray-bg: rgba(161,161,170,0.12);
+      --accent: #60a5fa;
+      --shadow: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  header {
+    padding: 40px 48px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+  header h1 {
+    font-size: 28px;
+    margin: 0;
+    letter-spacing: -0.02em;
+    font-weight: 700;
+  }
+  header .sub {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+  }
+  header .timestamp {
+    color: var(--muted);
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  main {
+    padding: 32px 48px 64px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  section + section { margin-top: 40px; }
+
+  h2 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin: 0 0 16px;
+    font-weight: 600;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+  }
+  .stat-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+    font-weight: 600;
+  }
+  .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    margin-top: 8px;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-value .accent-green { color: var(--green); }
+  .stat-value .accent-yellow { color: var(--yellow); }
+  .stat-value .accent-red { color: var(--red); }
+  .stat-foot {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .card:hover {
+    transform: translateY(-1px);
+    border-color: var(--border-strong);
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .card-title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-weight: 600;
+  }
+  .status .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .status.green  { background: var(--green-bg);  color: var(--green); }
+  .status.yellow { background: var(--yellow-bg); color: var(--yellow); }
+  .status.red    { background: var(--red-bg);    color: var(--red); }
+  .status.gray   { background: var(--gray-bg);   color: var(--gray); }
+  .status.green .dot  { background: var(--green); }
+  .status.yellow .dot { background: var(--yellow); }
+  .status.red .dot    { background: var(--red); }
+  .status.gray .dot   { background: var(--gray); }
+
+  .progress {
+    width: 100%;
+    height: 8px;
+    background: var(--panel-2);
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .progress > span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.4s ease;
+  }
+  .bar-green  { background: var(--green); }
+  .bar-yellow { background: var(--yellow); }
+  .bar-red    { background: var(--red); }
+  .bar-gray   { background: var(--gray); }
+
+  .meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+    font-variant-numeric: tabular-nums;
+  }
+  .meta strong { color: var(--text); font-weight: 600; }
+
+  .breakdown {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .breakdown span {
+    background: var(--panel-2);
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-variant-numeric: tabular-nums;
+  }
+  .breakdown span.blocked { color: var(--red); background: var(--red-bg); font-weight: 600; }
+
+  .chart-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+    height: 440px;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    padding: 24px;
+    border-top: 1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Netlab · Portafolio Operativo</h1>
+    <div class="sub">Estado consolidado de los proyectos Netlab — vista de operación</div>
+  </div>
+  <div class="timestamp" id="timestamp"></div>
+</header>
+
+<main>
+
+  <section>
+    <div class="stats" id="stats"></div>
+  </section>
+
+  <section>
+    <h2>Proyectos</h2>
+    <div class="grid" id="projectGrid"></div>
+  </section>
+
+  <section>
+    <h2>Distribución de tickets por estado</h2>
+    <div class="chart-wrap">
+      <canvas id="stackedChart"></canvas>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Netlab · Dashboard generado automáticamente · <span id="footer-date"></span>
+</footer>
+
+<script>
+  const projects = [
+    {
+      name: "AURA",
+      status: "riesgo",
+      statusLabel: "En riesgo",
+      total: 28,
+      breakdown: { "Por hacer": 21, "En revisión": 7 }
+    },
+    {
+      name: "M4U",
+      status: "riesgo",
+      statusLabel: "En riesgo",
+      total: 25,
+      breakdown: { "Por hacer": 17, "En curso": 8 }
+    },
+    {
+      name: "MEXAR",
+      status: "estancado",
+      statusLabel: "Estancado",
+      total: 44,
+      breakdown: { "Bloqueado": 2, "En curso": 2, "Por hacer": 38, "Finalizado": 2 }
+    },
+    {
+      name: "MURR",
+      status: "activo",
+      statusLabel: "Activo",
+      total: 35,
+      breakdown: { "Por hacer": 16, "En curso": 5, "En revisión": 14 }
+    },
+    {
+      name: "GDP",
+      status: "cerrado",
+      statusLabel: "Cerrado",
+      total: 0,
+      breakdown: {}
+    },
+    {
+      name: "KAN",
+      status: "activo",
+      statusLabel: "Activo",
+      total: 79,
+      breakdown: { "Backlog": 32, "En progreso": 44, "Bloqueado": 3 }
+    },
+    {
+      name: "PUBLIMSCE",
+      status: "cerrado",
+      statusLabel: "Sin datos",
+      total: 0,
+      breakdown: {}
+    },
+    {
+      name: "SA",
+      status: "cerrado",
+      statusLabel: "Sin datos",
+      total: 0,
+      breakdown: {}
+    }
+  ];
+
+  const colorMap = {
+    activo:    { class: "green",  bar: "bar-green",  hex: "#16a34a", chartHex: "#22c55e" },
+    riesgo:    { class: "yellow", bar: "bar-yellow", hex: "#ca8a04", chartHex: "#eab308" },
+    estancado: { class: "red",    bar: "bar-red",    hex: "#dc2626", chartHex: "#ef4444" },
+    cerrado:   { class: "gray",   bar: "bar-gray",   hex: "#71717a", chartHex: "#71717a" }
+  };
+
+  const STATUS_BUCKETS = {
+    "Backlog":     { bucket: "Por hacer", color: "#94a3b8" },
+    "Por hacer":   { bucket: "Por hacer", color: "#94a3b8" },
+    "En curso":    { bucket: "En curso",   color: "#3b82f6" },
+    "En progreso": { bucket: "En curso",   color: "#3b82f6" },
+    "En revisión": { bucket: "En revisión", color: "#a855f7" },
+    "Finalizado":  { bucket: "Finalizado", color: "#22c55e" },
+    "Bloqueado":   { bucket: "Bloqueado",  color: "#ef4444" }
+  };
+
+  function percentDone(p) {
+    if (!p.total) return p.status === "cerrado" ? 100 : 0;
+    const done = p.breakdown["Finalizado"] || 0;
+    const inProgress =
+      (p.breakdown["En curso"]    || 0) +
+      (p.breakdown["En progreso"] || 0) +
+      (p.breakdown["En revisión"] || 0);
+    const weighted = done + inProgress * 0.5;
+    return Math.round((weighted / p.total) * 100);
+  }
+  function openTickets(p) {
+    return Object.entries(p.breakdown).reduce((acc, [k, v]) => {
+      if (k === "Finalizado") return acc;
+      return acc + v;
+    }, 0);
+  }
+  function blockedTickets(p) {
+    return p.breakdown["Bloqueado"] || 0;
+  }
+
+  const totals = {
+    activos:  projects.filter(p => p.status === "activo").length,
+    riesgo:   projects.filter(p => p.status === "riesgo").length,
+    abiertos: projects.reduce((acc, p) => acc + openTickets(p), 0),
+    bloqueados: projects.reduce((acc, p) => acc + blockedTickets(p), 0)
+  };
+
+  const statsEl = document.getElementById("stats");
+  statsEl.innerHTML = `
+    <div class="stat">
+      <div class="stat-label">Proyectos activos</div>
+      <div class="stat-value"><span class="accent-green">${totals.activos}</span> <span style="color:var(--muted);font-size:18px;font-weight:500;">/ ${projects.length}</span></div>
+      <div class="stat-foot">de ${projects.length} proyectos en el portafolio</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Tickets abiertos</div>
+      <div class="stat-value">${totals.abiertos}</div>
+      <div class="stat-foot">en todos los proyectos activos</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">En riesgo</div>
+      <div class="stat-value"><span class="accent-yellow">${totals.riesgo}</span></div>
+      <div class="stat-foot">proyectos requieren atención</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Bloqueados</div>
+      <div class="stat-value"><span class="${totals.bloqueados ? 'accent-red' : ''}">${totals.bloqueados}</span></div>
+      <div class="stat-foot">tickets con bloqueo activo</div>
+    </div>
+  `;
+
+  const grid = document.getElementById("projectGrid");
+  projects.forEach(p => {
+    const c = colorMap[p.status];
+    const pct = percentDone(p);
+    const open = openTickets(p);
+    const breakdownHtml = Object.entries(p.breakdown)
+      .map(([k, v]) => `<span class="${k === 'Bloqueado' ? 'blocked' : ''}">${k}: ${v}</span>`)
+      .join("");
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${p.name}</div>
+        <span class="status ${c.class}"><span class="dot"></span>${p.statusLabel}</span>
+      </div>
+      <div class="progress"><span class="${c.bar}" style="width:${pct}%"></span></div>
+      <div class="meta">
+        <span>Avance <strong>${pct}%</strong></span>
+        <span>Abiertos <strong>${open}</strong>${p.total ? ` / ${p.total}` : ''}</span>
+      </div>
+      ${breakdownHtml ? `<div class="breakdown">${breakdownHtml}</div>` : '<div class="breakdown"><span>Sin datos disponibles</span></div>'}
+    `;
+    grid.appendChild(card);
+  });
+
+  const ts = new Date();
+  const fmt = ts.toLocaleString("es-MX", { dateStyle: "long", timeStyle: "short" });
+  document.getElementById("timestamp").textContent = "Actualizado: " + fmt;
+  document.getElementById("footer-date").textContent = ts.toISOString().slice(0, 10);
+
+  const allBuckets = ["Por hacer", "En curso", "En revisión", "Finalizado", "Bloqueado"];
+  const bucketColors = {
+    "Por hacer":   "#94a3b8",
+    "En curso":    "#3b82f6",
+    "En revisión": "#a855f7",
+    "Finalizado":  "#22c55e",
+    "Bloqueado":   "#ef4444"
+  };
+
+  const projectsWithData = projects.filter(p => p.total > 0);
+  const datasets = allBuckets.map(bucket => ({
+    label: bucket,
+    backgroundColor: bucketColors[bucket],
+    data: projectsWithData.map(p => {
+      let total = 0;
+      for (const [k, v] of Object.entries(p.breakdown)) {
+        const mapped = STATUS_BUCKETS[k];
+        if (mapped && mapped.bucket === bucket) total += v;
+      }
+      return total;
+    }),
+    borderRadius: 4,
+    borderSkipped: false
+  }));
+
+  const isDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+  const tickColor = isDark ? "#a1a1aa" : "#71717a";
+
+  const ctx = document.getElementById("stackedChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: projectsWithData.map(p => p.name),
+      datasets
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: "bottom",
+          labels: { color: tickColor, boxWidth: 12, boxHeight: 12, padding: 14, font: { size: 12 } }
+        },
+        tooltip: {
+          backgroundColor: isDark ? "#18181b" : "#ffffff",
+          borderColor: isDark ? "#27272a" : "#e4e4e7",
+          borderWidth: 1,
+          padding: 12,
+          titleColor: isDark ? "#fafafa" : "#09090b",
+          bodyColor: isDark ? "#a1a1aa" : "#52525b",
+          callbacks: {
+            footer: items => {
+              const total = items.reduce((acc, i) => acc + i.parsed.y, 0);
+              return "Total: " + total;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          stacked: true,
+          grid: { display: false },
+          ticks: { color: tickColor, font: { weight: "600" } }
+        },
+        y: {
+          stacked: true,
+          beginAtZero: true,
+          grid: { color: gridColor },
+          ticks: { color: tickColor, precision: 0 }
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
